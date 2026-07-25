@@ -6,3 +6,15 @@ persist.vendor.camera.privapp.list=com.android.camera
 
 # MiuiCamera
 ro.miui.notch=1
+
+# MiuiCamera gates its permission flow on this: er.a evaluates
+#   SystemProperties.get("ro.product.mod_device").contains("_global")
+# and, when false, treats the device as a China build.  It then fires
+# miui.intent.action.SYSTEM_PERMISSION_DECLARE at com.miui.securitycenter,
+# which does not exist outside HyperOS; the framework delivers
+# onActivityResult(200, RESULT_CANCELED) and the camera finish()es itself
+# straight after onResume.  sapphire is a global device (see the
+# BuildFingerprint in statix_sapphire.mk), so declare it as such.
+# This is the same outcome as patches/0002-Assume-that-mod_device-is-global,
+# without having to repack and resign the 176 MB prebuilt APK.
+ro.product.mod_device=sapphire_global
